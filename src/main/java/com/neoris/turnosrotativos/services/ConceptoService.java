@@ -11,10 +11,11 @@ import com.neoris.turnosrotativos.exceptions.BadRequestException;
 import com.neoris.turnosrotativos.repositories.ConceptoRepository;
 
 @Service
-public class ConceptoService {
+public class ConceptoService implements IConceptoService {
     @Autowired
     ConceptoRepository conceptoRepository;
 
+    @Override
     public List<Concepto> obtenerConceptos(){
         List<Concepto> listaCompleta = (List<Concepto>)conceptoRepository.findAll();
         List<Concepto> listaFiltrada = listaCompleta.stream().
@@ -23,6 +24,7 @@ public class ConceptoService {
         return listaFiltrada;
     }
 
+    @Override
     public Concepto buscarConceptoPorId(Integer id){
         if(conceptoRepository.existsById(id)){
             return conceptoRepository.findById(id).get();

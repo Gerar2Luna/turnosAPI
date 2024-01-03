@@ -7,17 +7,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.swing.text.html.Option;
 import javax.validation.Valid;
-
 import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
-
 import com.neoris.turnosrotativos.entities.Empleado;
 import com.neoris.turnosrotativos.exceptions.BadRequestException;
 import com.neoris.turnosrotativos.exceptions.ConflictoException;
@@ -35,8 +32,6 @@ public class EmpleadoService {
         return (List<Empleado>)empleadoRepository.findAll();
 
     }
-
-    
 
     public ResponseEntity<Object> crearEmpleado(@Valid Empleado empleado){
         this.validarCreacionEmpleado(empleado);
@@ -90,7 +85,6 @@ public class EmpleadoService {
     }
 
     // Metodos de validacion de negocio
-
 
     // Invoca en cadena a todos los metodos de validacion para el post empleado, solo para mejorar legibilidad 
     public void validarCreacionEmpleado(Empleado empleado){
@@ -199,8 +193,6 @@ public class EmpleadoService {
         else
             return true;
     }
-
-    
 
     public boolean validarActualizacionDocumento(Integer nroDocumento, Integer id){
         if(empleadoRepository.findByNroDocumento(nroDocumento).isPresent()){
