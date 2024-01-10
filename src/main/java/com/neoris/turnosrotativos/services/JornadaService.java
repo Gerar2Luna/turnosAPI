@@ -15,7 +15,7 @@ import com.neoris.turnosrotativos.exceptions.BadRequestException;
 import com.neoris.turnosrotativos.repositories.JornadaRepository;
 
 @Service
-public class JornadaService {
+public class JornadaService implements IJornadaService{
     @Autowired
     JornadaRepository jornadaRepository;
     
@@ -25,23 +25,24 @@ public class JornadaService {
     @Autowired
     ConceptoService conceptoService;
 
+    @Override
     public List<Jornada> getAllJornadas(){
         return (List<Jornada>)jornadaRepository.findAll();
     }
-
+    @Override
     public List<Jornada> getByNroDocumento(Integer nroDocumento){
         return jornadaRepository.findByNroDocumento(nroDocumento);
     }
-
+    @Override
     public List<Jornada> getByFecha(String fecha){
         return jornadaRepository.findByFecha(fecha);
     }
-
+    @Override
     public List<Jornada> getByNroDocumentoAndFecha(Integer nroDocumento, String fecha){
         return jornadaRepository.findByNroDocumentoAndFecha(nroDocumento, fecha);
     }
 
-
+    @Override
     public Jornada crearJornada(JornadaDTO jornadaDTO){
         this.validarCreacionJornada(jornadaDTO);
         Jornada jornada = new Jornada();
@@ -56,6 +57,7 @@ public class JornadaService {
     }
 
     // Se llama en cadena la validacion de jornadas
+    @Override
     public void validarCreacionJornada(JornadaDTO jornadaDTO){
         this.validarHorasTrabajadas(jornadaDTO);
         this.isDiaLibre(jornadaDTO);
@@ -68,7 +70,7 @@ public class JornadaService {
         this.validarMaximoDiaLibre(jornadaDTO);
     }
 
-
+    @Override
     public boolean validarHorasTrabajadas(JornadaDTO jornadaDTO){
         // Verifica si el concepto corresponde a dia libre y retorna bad request si ingreso hsTrabajadas
 
@@ -97,7 +99,7 @@ public class JornadaService {
     }
     // Recorre la lista de jornadas por nro documento y fecha, obtiene las jornadas de ese empleado, luego verifica en todas las jornadas
     // posibles para ese dia si alguna ya es dia libre y de ser asi termina la ejecucion devolviendo el badrequest asociado
-
+    @Override
     public boolean isDiaLibre(JornadaDTO jornadaDTO){
         List<Jornada> jornadasDelEmpleado = this.getByNroDocumentoAndFecha(empleadoService.
                                                 obtenerInfoEmpleado(jornadaDTO.getIdEmpleado()).get().getNroDocumento(),
@@ -108,9 +110,7 @@ public class JornadaService {
         }
         return true;
     }
-
-
-
+    @Override
     public boolean validarConceptoMismoTipo(JornadaDTO jornadaDTO){
         List<Jornada> jornadasDelEmpleado = this.getByNroDocumentoAndFecha(empleadoService.
                                                 obtenerInfoEmpleado(jornadaDTO.getIdEmpleado()).get().getNroDocumento(),
@@ -138,7 +138,7 @@ public class JornadaService {
         // Si pasa todas las validaciones se devuelve true
         return true;
     }
-
+    @Override
     public boolean validarSumatoriaHorasTrabajadas(JornadaDTO jornadaDTO){
         List<Jornada> jornadasDelEmpleado = this.getByNroDocumentoAndFecha(empleadoService.
                                                 obtenerInfoEmpleado(jornadaDTO.getIdEmpleado()).get().getNroDocumento(),
@@ -162,6 +162,7 @@ public class JornadaService {
     }
 
     // Este metodo busca segun la fecha del dto el lunes y sabado correspondiente a esa fecha (semana habil)
+    @Override
     public List<Jornada> obtenerJornadasDeLaSemana(JornadaDTO jornadaDTO){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate fecha = LocalDate.parse(jornadaDTO.getFecha(), formatter);
@@ -173,7 +174,7 @@ public class JornadaService {
                                 empleadoService.obtenerInfoEmpleado(jornadaDTO.getIdEmpleado()).get().getNroDocumento()
                                 ,inicioSemana, finSemana);
     }
-
+    @Override
     public boolean validarCargaHorariaSemanal(JornadaDTO jornadaDTO){
         List<Jornada> jornadasSemanales = this.obtenerJornadasDeLaSemana(jornadaDTO);
         Integer cargaHorariaSemanal=0;
@@ -190,7 +191,7 @@ public class JornadaService {
         }
         return true;
     }
-
+    @Override
     public boolean validarMaximoTurnoExtra(JornadaDTO jornadaDTO){
         // Obtenemos las jornadas de la semana asociada a la fecha del dto
         List<Jornada> jornadasSemanales = this.obtenerJornadasDeLaSemana(jornadaDTO);
@@ -206,7 +207,7 @@ public class JornadaService {
         }
         return true;
     }
-
+    @Override
     public boolean validarMaximoTurnoNormal(JornadaDTO jornadaDTO){
         // Obtenemos las jornadas de la semana asociada a la fecha del dto
         List<Jornada> jornadasSemanales = this.obtenerJornadasDeLaSemana(jornadaDTO);
@@ -223,7 +224,7 @@ public class JornadaService {
         }
         return true;
     }
-
+    @Override
     public boolean validarMaximoDiaLibre(JornadaDTO jornadaDTO){
         // Obtenemos las jorndas de la semana asociada ala fecha del dto
         List<Jornada> jornadasSemanales = this.obtenerJornadasDeLaSemana(jornadaDTO);

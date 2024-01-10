@@ -22,17 +22,18 @@ import com.neoris.turnosrotativos.exceptions.RecursoNoEncontradoException;
 import com.neoris.turnosrotativos.repositories.EmpleadoRepository;
 
 @Service
-public class EmpleadoService {
+public class EmpleadoService implements IEmpleadoService {
     
     @Autowired
     EmpleadoRepository empleadoRepository;
-
+    @Override
     public List<Empleado> obtenerEmpleados() { // GET ALL Empleados
         
         return (List<Empleado>)empleadoRepository.findAll();
 
     }
-
+    
+    @Override
     public ResponseEntity<Object> crearEmpleado(@Valid Empleado empleado){
         this.validarCreacionEmpleado(empleado);
         LocalDateTime fechaCreacion = LocalDateTime.now();
@@ -40,7 +41,8 @@ public class EmpleadoService {
         empleado.setFechaCreacion(fechaCreacion.format(formatter));
         return new ResponseEntity<>(empleadoRepository.save(empleado), HttpStatus.CREATED);
     }
-
+    
+    @Override
     public Optional<Empleado> obtenerInfoEmpleado(Integer id){
         if(empleadoExists(id)){
         return empleadoRepository.findById(id);
@@ -51,7 +53,7 @@ public class EmpleadoService {
 
     // Devuelve un response entity Empleado con los valores actualizados y codigo 200 de realizarse correctamente
     // Caso contrario retorna el mensaje asociado a la excepcion correspondiente (ver CustomExceptionHandler)
-
+    @Override
     public ResponseEntity<Empleado> actualizarEmpleado(@Valid Empleado empleadoActualizado, @PathVariable Integer id) {
         if (empleadoExists(id)) {
             this.validarActualizarEmpleado(empleadoActualizado,id);
@@ -65,10 +67,10 @@ public class EmpleadoService {
             
         }
     }
-    
+  
     // Devuelve un ResponseEntity Object con codigo 204 en caso de que se elimine correctamente
     // Caso contrario retorna el mensaje asociado a la excepcion correspondiente (ver CustomExceptionHandler)
-
+    @Override
     public ResponseEntity<Object> eliminarEmpleadoPorId(@PathVariable Integer id){
         if (empleadoExists(id)){ // Verifica existencia de empleado
             int iden = id;
@@ -79,6 +81,7 @@ public class EmpleadoService {
         }
     }
 
+    @Override
     public boolean empleadoExists(Integer empleadoID){
         Optional<Empleado> empleadOptional = (empleadoRepository.findById(empleadoID));
         return empleadOptional.isPresent();
@@ -87,6 +90,7 @@ public class EmpleadoService {
     // Metodos de validacion de negocio
 
     // Invoca en cadena a todos los metodos de validacion para el post empleado, solo para mejorar legibilidad 
+    @Override
     public void validarCreacionEmpleado(Empleado empleado){
         this.validarDocumento(empleado.getNroDocumento());
         this.validarFechaNacimiento(empleado.getFechaNacimiento());
@@ -97,6 +101,7 @@ public class EmpleadoService {
         this.validarFormatoNombre(empleado.getNombre(),empleado.getApellido());
     }
 
+    @Override
     public void validarActualizarEmpleado(Empleado empleado, Integer id){
         this.validarFechaNacimiento(empleado.getFechaNacimiento());
         this.validarEdad(empleado.getFechaNacimiento());
@@ -107,6 +112,7 @@ public class EmpleadoService {
         this.validarFormatoNombre(empleado.getNombre(), empleado.getApellido());
     }
     // Valida si es mayor de edad
+    @Override
     public boolean validarEdad(String fechaNacimiento) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate fechaNac = LocalDate.parse(fechaNacimiento, formatter);
@@ -121,6 +127,7 @@ public class EmpleadoService {
     }
 
     // Valida que la fehca de nacimiento no sea posterior al dia de la fecha
+    @Override
     public boolean validarFechaNacimiento(String fechaNacimiento){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate fechaNac = LocalDate.parse(fechaNacimiento, formatter);
@@ -131,6 +138,7 @@ public class EmpleadoService {
         else return true;
     }
     // Valida que la fecha ingreso no sea posterior al dia de la fecha
+    @Override
     public boolean validarFechaIngreso(String fechaIngreso){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate fechaIngre = LocalDate.parse(fechaIngreso, formatter);
@@ -142,6 +150,7 @@ public class EmpleadoService {
     }
 
     // Valida que en el nombre no hayan caracteres restringidos
+    @Override
     public boolean validarFormatoNombre(String nombre, String apellido){
         String patron = "[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]";
         Pattern pattern = Pattern.compile(patron);
@@ -156,6 +165,7 @@ public class EmpleadoService {
         return true;
     }
     // Valida si no existe un empleado con ese documento ya creado
+    @Override
     public boolean validarDocumento(Integer nroDocumento){
         Optional<Empleado> empleadoABuscar = empleadoRepository.findByNroDocumento(nroDocumento);
         if(empleadoABuscar.isPresent()){
@@ -165,6 +175,7 @@ public class EmpleadoService {
     }
 
     // Valida que el campo email tenga formato valido
+    @Override
     public boolean validarFormatoEmail(String email){
         String patron = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
         Pattern pattern = Pattern.compile(patron);
@@ -176,6 +187,7 @@ public class EmpleadoService {
     }
 
     // Valida si se intenta registrar un empleado con un email ya registrado
+    @Override
     public boolean validarEmailDuplicado(String email){
         if(empleadoRepository.findByEmail(email).isPresent()){
             throw new ConflictoException("Ya existe un empleado con el email ingresado.");
@@ -183,6 +195,7 @@ public class EmpleadoService {
         else return true;
     }
 
+    @Override
     public boolean validarActualizacionEmail(String email, Integer id){
         if(empleadoRepository.findByEmail(email).isPresent()){
             if(id==empleadoRepository.findByEmail(email).get().getId()){
@@ -194,6 +207,7 @@ public class EmpleadoService {
             return true;
     }
 
+    @Override
     public boolean validarActualizacionDocumento(Integer nroDocumento, Integer id){
         if(empleadoRepository.findByNroDocumento(nroDocumento).isPresent()){
             if(id==(empleadoRepository.findByNroDocumento(nroDocumento).get().getId())){
@@ -205,6 +219,7 @@ public class EmpleadoService {
             return true;
     }
 
+    @Override
     public String getNombreCompleto(Empleado empleado){
         String nombreCompleto = empleado.getNombre()+" "+empleado.getApellido();
         return nombreCompleto;
